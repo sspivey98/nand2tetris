@@ -1,0 +1,15 @@
+function Constants.COLS 0
+push constant 7
+return
+function Constants.LEVELS 0
+push constant 15
+return
+function Constants.KEY_SPACE 0
+push constant 32
+return
+function Constants.KEY_P 0
+push constant 80
+return
+function Constants.KEY_Q 0
+push constant 81
+return

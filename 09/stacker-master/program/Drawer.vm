@@ -1,0 +1,126 @@
+function Drawer.grid 4
+push constant 208
+pop local 0
+push constant 226
+pop local 1
+push constant 0
+not
+call Screen.setColor 1
+pop temp 0
+label WHILE_EXP0
+push local 2
+push constant 8
+lt
+not
+if-goto WHILE_END0
+push local 0
+push constant 16
+push local 0
+push constant 226
+call Screen.drawLine 4
+pop temp 0
+push local 0
+push constant 14
+add
+pop local 0
+push local 2
+push constant 1
+add
+pop local 2
+goto WHILE_EXP0
+label WHILE_END0
+label WHILE_EXP1
+push local 3
+push constant 16
+lt
+not
+if-goto WHILE_END1
+push constant 208
+push local 1
+push constant 306
+push local 1
+call Screen.drawLine 4
+pop temp 0
+push local 1
+push constant 14
+sub
+pop local 1
+push local 3
+push constant 1
+add
+pop local 3
+goto WHILE_EXP1
+label WHILE_END1
+push constant 0
+return
+function Drawer.row 1
+push constant 0
+pop local 0
+label WHILE_EXP0
+push local 0
+call Constants.COLS 0
+lt
+not
+if-goto WHILE_END0
+push local 0
+push argument 0
+add
+pop pointer 1
+push that 0
+if-goto IF_TRUE0
+goto IF_FALSE0
+label IF_TRUE0
+push local 0
+push argument 1
+push constant 0
+not
+call Drawer.block 3
+pop temp 0
+goto IF_END0
+label IF_FALSE0
+push local 0
+push argument 1
+push constant 0
+call Drawer.block 3
+pop temp 0
+label IF_END0
+push local 0
+push constant 1
+add
+pop local 0
+goto WHILE_EXP0
+label WHILE_END0
+push constant 0
+return
+function Drawer.block 4
+push constant 0
+pop local 0
+push constant 16896
+pop local 1
+push constant 210
+push argument 0
+push constant 14
+call Math.multiply 2
+add
+pop local 2
+push constant 214
+push argument 1
+push constant 14
+call Math.multiply 2
+sub
+pop local 3
+push argument 2
+call Screen.setColor 1
+pop temp 0
+push local 2
+push local 3
+push local 2
+push constant 10
+add
+push local 3
+push constant 10
+add
+call Screen.drawRectangle 4
+pop temp 0
+push constant 0
+return

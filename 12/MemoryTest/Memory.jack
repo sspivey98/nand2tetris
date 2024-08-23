@@ -1,0 +1,173 @@
+// This file is part of www.nand2tetris.org
+// and the book "The Elements of Computing Systems"
+// by Nisan and Schocken, MIT Press.
+// File name: projects/12/Memory.jack
+
+/**
+ * This library provides two services: direct access to the computer's main
+ * memory (RAM), and allocation and recycling of memory blocks. The Hack RAM
+ * consists of 32,768 words, each holding a 16-bit binary number.
+ */ 
+class Memory {
+
+    static Array memory;
+    static Array freelist;
+    static Array memoryBottom;
+
+    static int heapBottom;
+    static int heapTop;
+
+    static int LENGTH;
+    static int NEXT;
+    
+    static int ALLOC_LENGTH;
+
+    /** Initializes the class. */
+    function void init() {
+        let heapTop = 2048;
+        let heapBottom = 16384;
+        let memory = 0;
+        let freelist = heapTop; //set the pointer to the first avaible piece in our memory
+        let LENGTH = 0;
+        let NEXT = 1;
+        let freelist[LENGTH] = heapBottom - heapTop; //set the last piece of memory to the bottom of the stack
+        let freelist[NEXT] = null; //null pointer for our 'linked list'
+
+        let ALLOC_LENGTH = -1; 
+        return;
+    }
+
+    /** Returns the RAM value at the given address. */
+    function int peek(int address) {
+        return memory[address];
+    }
+
+    /** Sets the RAM value at the given address to the given value. */
+    function void poke(int address, int value) {
+        let memory[address] = value;
+        return;
+    }
+
+    /*
+    loop to find a free 'block'
+    if blocksize < "bestfit-blocksize" and blocksize > 'size' -> set blocksize to bestfit
+    until next is null
+
+    3 cases:
+        all blocks full
+        block found
+        null pointer (block is freelist)
+    */
+
+    function Array bestFitBlock(int size) {
+        var Array curBlock, bestBlock;
+        var int bestSize, curSize;
+
+        let bestBlock = null;
+        let bestSize = heapBottom - heapTop;
+        let curBlock = freelist;
+
+        if(curBlock[NEXT] = null) {
+            return curBlock;
+        }
+
+        while(~(curBlock = null)) {
+
+            let curSize = curBlock[LENGTH] - 1;
+            
+            if(~(curSize < size) & (curSize < bestSize)) {
+                let bestBlock = curBlock;
+                let bestSize = curSize;
+            }
+
+            let curBlock = curBlock[NEXT];
+        }
+        return bestBlock;
+
+    }
+
+
+    //TALK ABOUT
+    /** Finds an available RAM block of the given size and returns
+     *  a reference to its base address. 
+     */
+    function int alloc(int size) {
+        var Array blockFound, nextBlock, result;
+
+        let blockFound = Memory.bestFitBlock(size);
+        let result = blockFound + 1;
+
+
+        if(~(blockFound = null)) {
+            if (blockFound[LENGTH] > (size + 3)) {
+                let nextBlock = blockFound + size + 1;
+                let nextBlock[NEXT] = blockFound[NEXT];
+                let nextBlock[LENGTH] = blockFound[LENGTH] - size - 1;
+                let result[ALLOC_LENGTH] = size + 1;
+                let freelist = nextBlock;
+            }
+            else {
+                let nextBlock = blockFound[NEXT];
+                let result[ALLOC_LENGTH] = blockFound[LENGTH];
+            }
+        let blockFound = nextBlock;
+
+        }
+
+    return result;
+    }
+
+    //TALK ABOUT
+    /** De-allocates the given object (cast as an array) by making
+     *  it available for future allocations. */
+    function void deAlloc(Array o) {
+        var Array nextBlock;
+        var Array preBlock;
+        var int ALLOC_LENGTH;
+
+        let ALLOC_LENGTH = o[ALLOC_LENGTH];
+        let preBlock = Memory.findPreBlock(o);
+
+        if (preBlock = null) {
+            let o[LENGTH] = ALLOC_LENGTH;
+            let o[NEXT] = freelist;
+            let freelist = o;
+            let preBlock = o; //might need to change o pointer
+        }
+        else {
+            if ((preBlock + preBlock[LENGTH]) = o) { //join previous free block with our allocation block
+                let preBlock[LENGTH] = preBlock[LENGTH] + ALLOC_LENGTH;
+            }
+            else {
+                let o[LENGTH] = ALLOC_LENGTH;
+                let o[NEXT] = preBlock[NEXT];
+                let preBlock[NEXT] = o;
+                let preBlock = o;
+            }
+        }
+        if ((preBlock + preBlock[LENGTH]) = preBlock[NEXT]) { //join previous free block with next free block, assuming they 'touch'
+            let nextBlock = preBlock[NEXT];
+            let preBlock[LENGTH] = preBlock[LENGTH] + nextBlock[LENGTH];
+            let preBlock[NEXT] = nextBlock[NEXT]; 
+
+        }
+
+        return;
+    }    
+
+    function Array findPreBlock(Array space) {
+        var Array preBlock;
+
+        if (freelist > space) {
+            return null;
+        }
+
+        let preBlock = freelist;
+        while(~(preBlock[NEXT] = null) & (preBlock[NEXT] < space)) {
+            let preBlock = preBlock[NEXT];
+        }
+
+        return preBlock;
+
+    }
+}

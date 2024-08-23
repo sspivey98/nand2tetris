@@ -1,0 +1,189 @@
+class Hangman {
+
+   field String solution;
+   field String correctGuesses;
+   field Array guessesArray;
+   field int ptr;
+   field int ArraySize;
+
+   //initialize
+   constructor Hangman new() {
+      var String hangman,guesses;
+      var int i, j;
+      var int answerLength, permutations;
+      let ArraySize = 15;
+      let guessesArray = Array.new(ArraySize);
+      let hangman = "HangMan";
+      let guesses = "Guess:";
+      let i = 0;
+      let j = 0;
+      let ptr = 0;
+      let permutations = 1;
+      
+      let solution = "SADNESS"; 
+      let correctGuesses = String.new(solution.length()); //change this --> this is just char count
+
+      while(i < (solution.length())) {
+         let correctGuesses = correctGuesses.appendChar(254); // 219 Extended ascii char '█'
+         let i = i+1; 
+      }
+
+      while (j < (solution.length())) {
+         let permutations = permutations * (solution.length()-j);
+         let j = j + 1;
+      }
+
+      do Output.printString(hangman);
+      do Output.printString(" - You have ");
+      do Output.printInt(permutations);
+      do Output.printString(" total permutations.");
+      do Output.println();
+      do Output.println();
+      do Output.printString(guesses);
+      do Output.println();
+      return this;
+   }
+   
+   //main method
+   method void run() {
+      var boolean endGame;
+      var int line, wrongGuesses;
+      var char guess;
+       
+      let wrongGuesses = 0;
+      let line = 3; 
+      let endGame = 0;
+      do drawHangPost();
+      
+      while(~(endGame)) {
+         do Output.printString(correctGuesses);
+         do Output.moveCursor(line,15);
+         let line = line+1;
+         let guess = Keyboard.readChar();
+         do Output.println();
+
+         if(~(isCorrectGuess(guess))) {
+            if(wrongGuesses = 0) {
+               do drawHead();
+            }
+            if(wrongGuesses = 1) {
+               do drawTorso();
+            }
+            if(wrongGuesses = 2) {
+               do drawRightArm();
+            }
+            if(wrongGuesses = 3) {
+               do drawLeftArm();
+            }
+            if(wrongGuesses = 4) {
+               do drawRightLeg();
+            }
+            if(wrongGuesses = 5) {
+               do drawLeftLeg();
+               do Output.printString("You're bad; You've lost.");
+               let endGame = -1;
+            }
+            let wrongGuesses = wrongGuesses + 1; 
+         }
+
+         if(isWin()) {
+            do Output.printString("I now bestow you with a 'dub'!");
+            do Sys.halt();
+         }
+      }
+      return;
+   }
+   
+   // checks to see if each char in solution string is █, and returns true if there are none.
+   method boolean isWin() {
+      var int i;
+      let i = 0;
+      while(i < correctGuesses.length())
+      { 
+         if(correctGuesses.charAt(i) = 254)
+         {
+            return 0; 
+         }
+         let i = i+1;
+      }
+      do Output.printString(correctGuesses);
+      do Output.println();
+      return -1; 
+   }
+   
+   // checks to see if your guess is in the solution string
+   method boolean isCorrectGuess(char guess) { 
+      var boolean correct;
+      var int i;
+      var int j;
+      let i = 0;
+      let j = 0;
+      let correct = false;
+
+      while(j < ArraySize-1) { //returns false if you've already guessed.
+         if(guessesArray[j] = guess) {
+            return 0;
+         }
+         let j = j+1;
+      }
+
+      //adds guess to guessed list
+      while(i < solution.length())
+      {
+         if(guess = solution.charAt(i))
+         {
+            let correct = true;
+            do correctGuesses.setCharAt(i, guess); 
+            let guessesArray[ptr] = guess;
+            let ptr = ptr + 1;
+         }
+         let i=i+1;
+      }
+      if (correct) {
+         return -1;
+      }
+
+      return 0;
+   }
+
+//---------------------DRAW-------------------------------------
+   method void drawHangPost() { 
+      do Screen.setColor(true); //black
+      do Screen.drawRectangle(395,50,405,200);
+      do Screen.drawRectangle(300,40,405,50);
+      do Screen.drawRectangle(300,40,310,70);
+      return;
+   }
+   
+   method void drawHead() {
+      do Screen.drawCircle(305,90,20);
+      return;
+   }
+   method void drawTorso() {
+      do Screen.drawLine(305,110, 305, 160);
+      return;
+   }
+   method void drawRightArm() {
+      do Screen.drawLine(305,135, 320, 120);
+      return;
+   }
+
+   method void drawLeftArm() {
+      do Screen.drawLine(305,135, 290, 120);
+      return;
+   }
+   method void drawRightLeg() {
+      do Screen.drawLine(305,160, 325, 180);
+      return;
+   }
+   method void drawLeftLeg() {
+      do Screen.drawLine(305,160, 285, 180);
+      return;
+   }
+
+   //Deallocate Object in Memory.
+   method void dispose() {
+     do Memory.deAlloc(this);
+     return;
+   }
+}
